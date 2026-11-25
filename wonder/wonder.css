@@ -1,0 +1,122 @@
+/* 山寺行 · 独立增强模块样式。全部类名以 w- 开头，不碰原站样式。
+   视觉令牌对齐主站 DESIGN.md：墨绿纸面 + 唐木金唯一强调 + 宋体衬线。
+   注意：w-tip / w-prompt / w-dialog 是压在三维场景上的浮层，必须保持深色底 + 纸色字，
+   不能用半透明面板（否则会被场景吃掉可读性）——这是与主站面板层的唯一差别。 */
+:root{
+  --w-ink:#22342a; --w-paper:#f4f0dd; --w-paper-2:#d8d3bd;
+  --w-red:#dfbf8b; --w-gold:#dfbf8b; --w-line:rgba(244,240,221,.26);
+  --w-shadow:0 10px 32px #0b1a1260;
+}
+.w-panel,.w-tip,.w-toast,.w-dialog,.w-badge{font-family:"STSong","SimSun","Noto Serif CJK SC",serif;color:var(--w-paper)}
+
+/* 右下角「山寺志」控制台：墨绿半透明面板，与主站信息卡同一套语言 */
+.w-panel{
+  position:fixed;right:18px;bottom:20px;z-index:9200;width:244px;
+  background:var(--panel);
+  border:1px solid var(--line-2);border-radius:10px;box-shadow:var(--shadow-2);
+  backdrop-filter:blur(8px);padding:14px 15px 13px;user-select:none;
+  transition:max-height .28s ease,padding .28s ease;max-height:520px;overflow:hidden;
+}
+.w-panel.w-collapsed{max-height:42px;padding-top:9px;padding-bottom:8px}
+.w-panel.w-collapsed .w-body{opacity:0;pointer-events:none}
+.w-head{display:flex;align-items:center;justify-content:space-between;cursor:pointer;gap:8px}
+.w-head strong{font-size:15px;letter-spacing:.22em;font-weight:400;color:var(--gold)}
+.w-head small{font-size:10px;color:var(--paper-3);letter-spacing:.1em}
+.w-fold{border:0;background:none;cursor:pointer;font-size:13px;color:var(--paper-3);padding:2px 4px}
+.w-body{transition:opacity .2s ease;padding-top:10px}
+.w-row{margin:11px 0}
+.w-label{display:flex;justify-content:space-between;align-items:baseline;font-size:11px;color:var(--paper-2);letter-spacing:.08em;margin-bottom:6px}
+.w-label b{font-weight:700;color:var(--gold);font-size:12px;font-variant-numeric:tabular-nums}
+.w-segs{display:flex;gap:6px;flex-wrap:wrap}
+.w-seg{
+  flex:1;min-width:44px;min-height:34px;padding:6px 2px;font-size:12px;cursor:pointer;
+  border:1px solid var(--line-2);background:rgba(244,240,221,.05);color:var(--paper-2);
+  border-radius:6px;transition:.16s;font-family:inherit;letter-spacing:.06em;
+}
+.w-seg:hover{background:rgba(244,240,221,.12);color:var(--paper)}
+.w-seg.w-on{background:var(--gold);color:var(--ink-800);border-color:var(--gold);font-weight:700}
+.w-slider{width:100%;height:3px;appearance:none;background:linear-gradient(90deg,#8fa9c4,#c9a97e,#7d6a8a,#3d5170);border-radius:2px;outline:none;margin:4px 0}
+.w-slider::-webkit-slider-thumb{appearance:none;width:14px;height:14px;border-radius:50%;background:var(--gold);border:2px solid var(--ink-900);cursor:pointer}
+.w-stat{display:flex;gap:10px;flex-wrap:wrap;font-size:11px;color:var(--paper-2);border-top:1px solid var(--line-1);padding-top:10px;margin-top:12px}
+.w-stat span{white-space:nowrap}
+.w-stat b{color:var(--gold);font-weight:700;font-variant-numeric:tabular-nums}
+.w-help{font-size:11px;line-height:1.7;color:var(--paper-3);margin-top:9px}
+.w-help i{font-style:normal;color:var(--gold)}
+
+/* 底部交互提示：压在场景上，深墨绿实底保证可读 */
+.w-tip{
+  position:fixed;left:50%;bottom:74px;transform:translateX(-50%);z-index:9100;
+  background:var(--panel-solid);color:var(--paper);padding:8px 17px;border-radius:8px;
+  font-size:13px;letter-spacing:.12em;pointer-events:none;opacity:0;transition:opacity .18s;
+  border:1px solid var(--line-2);white-space:nowrap;backdrop-filter:blur(6px);
+}
+.w-tip.w-on{opacity:1}
+.w-tip b{color:var(--gold);font-weight:700}
+
+/* 走近互动提示：靠近可交互物时浮现，按 E 触发 */
+.w-prompt{
+  position:fixed;left:50%;bottom:118px;transform:translateX(-50%) translateY(6px);z-index:9200;
+  background:var(--panel);color:var(--paper);padding:10px 20px;border-radius:8px;
+  font-size:13px;letter-spacing:.14em;pointer-events:none;opacity:0;transition:opacity .22s,transform .22s;
+  border:1px solid var(--line-3);box-shadow:var(--shadow-2);white-space:nowrap;backdrop-filter:blur(6px);
+}
+.w-prompt.w-on{opacity:1;transform:translateX(-50%) translateY(0)}
+.w-prompt kbd{
+  font-family:inherit;font-size:12px;font-weight:700;color:var(--ink-800);
+  background:var(--gold);border:1px solid var(--gold-lo);
+  border-radius:4px;padding:1px 8px;margin:0 2px;box-shadow:0 2px 0 var(--gold-lo);
+}
+
+/* 轻提示：墨绿面板 + 金色左缘（原朱红） */
+.w-toast{
+  position:fixed;left:50%;top:74px;transform:translate(-50%,-8px);z-index:9400;
+  background:var(--panel);border:1px solid var(--line-2);border-left:3px solid var(--gold);
+  box-shadow:var(--shadow-2);padding:11px 19px;font-size:13px;line-height:1.65;
+  letter-spacing:.06em;opacity:0;transition:.22s;pointer-events:none;max-width:min(78vw,420px);
+  border-radius:8px;backdrop-filter:blur(6px);
+}
+.w-toast.w-on{opacity:1;transform:translate(-50%,0)}
+
+/* 人物对话：墨绿面板，压在场景上 */
+.w-dialog{
+  position:fixed;left:50%;bottom:96px;transform:translateX(-50%) translateY(8px);z-index:9300;
+  width:min(90vw,470px);background:var(--panel);
+  border:1px solid var(--line-2);box-shadow:var(--shadow-2);border-radius:10px;
+  padding:16px 19px 15px;opacity:0;transition:.22s;pointer-events:none;backdrop-filter:blur(8px);
+}
+.w-dialog.w-on{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:auto}
+.w-who{display:flex;align-items:center;gap:9px;margin-bottom:9px}
+.w-seal{width:25px;height:25px;display:grid;place-items:center;background:var(--gold);color:var(--ink-800);font-size:13px;border-radius:4px}
+.w-who strong{font-size:14px;letter-spacing:.18em;font-weight:400;color:var(--gold)}
+.w-who small{font-size:10.5px;color:var(--paper-3);letter-spacing:.08em}
+.w-close{margin-left:auto;border:0;background:none;font-size:17px;color:var(--paper-3);cursor:pointer;line-height:1}
+.w-text{font-size:13.5px;line-height:1.9;letter-spacing:.045em;white-space:pre-line;min-height:44px;color:var(--paper)}
+.w-choices{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.w-choice{
+  padding:7px 12px;font-size:11.5px;font-family:inherit;cursor:pointer;
+  border:1px solid var(--line-2);background:rgba(244,240,221,.05);border-radius:6px;color:var(--paper-2);
+}
+.w-choice:hover{border-color:var(--gold);color:var(--gold)}
+.w-ask{display:flex;gap:8px;margin-top:11px}
+.w-ask input{
+  flex:1;min-width:0;padding:7px 11px;font-family:inherit;font-size:12px;
+  border:1px solid var(--line-2);background:rgba(244,240,221,.05);color:var(--paper);outline:none;border-radius:6px;
+}
+.w-ask input:focus{border-color:var(--gold)}
+.w-ask button{padding:7px 14px;font-family:inherit;font-size:12px;cursor:pointer;border:0;background:var(--gold);color:var(--ink-800);border-radius:6px;font-weight:700}
+
+/* 轻功状态章：墨绿底 + 金字（原朱红底） */
+.w-badge{
+  position:fixed;right:20px;top:88px;z-index:9150;display:none;align-items:center;gap:8px;
+  background:var(--panel);color:var(--gold);padding:8px 14px;font-size:12px;
+  letter-spacing:.14em;border-radius:8px;box-shadow:var(--shadow-2);border:1px solid var(--gold-lo);
+}
+.w-badge.w-on{display:flex}
+.w-badge kbd{font-family:inherit;border:1px solid var(--gold-lo);padding:1px 5px;border-radius:3px;font-size:10.5px}
+
+@media (max-width:720px){
+  .w-panel{right:10px;bottom:12px;width:200px;padding:10px}
+  .w-tip{bottom:64px;font-size:11.5px;max-width:88vw;white-space:normal;text-align:center}
+  .w-dialog{bottom:78px;padding:12px}
+  .w-badge{right:10px;top:70px}
+}

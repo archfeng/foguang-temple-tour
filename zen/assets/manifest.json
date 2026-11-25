@@ -1,0 +1,21 @@
+{
+  "_说明": "佛堂桌面资产槽位。全部由远程机 JZ2PUB5 上 ComfyUI 的『本地』MiniMax H3 节点生成（免费、免登录、不走云端计费）。在 zen-hall 目录下运行 `python gen_assets.py all` 可一次性重生成全部资产，刷新页面即生效，代码无需改动。",
+  "_生成方式": "python gen_assets.py wall|floor|altar|window|sitframe|sit|all",
+  "_本地节点": {
+    "生图": "MiniMaxH3ImageConditioning（comfy_extras/nodes_minimax_h3.py）",
+    "生视频": "MiniMaxH3ImageToVideo + VAEDecodeAudio（视频自带原生音频）",
+    "注意": "不要用 MiniMaxH3ImageNode / MiniMaxH3ImageToVideoNode —— 那两个是以 Node 结尾的云端付费节点，需要登录 comfy.org"
+  },
+  "textures": {
+    "wall":   { "file": "assets/tex_wall.png",   "size": "1024x1024", "prompt": "暖木雕莲墙板，无缝平铺，哑光，平光无阴影" },
+    "floor":  { "file": "assets/tex_floor.png",  "size": "1024x1024", "prompt": "古庙深色木地板，温润棕褐，细木纹，俯视平铺" },
+    "altar":  { "file": "assets/tex_altar.png",  "size": "1024x1024", "prompt": "米黄砂岩佛坛浮雕，莲瓣祥云，宁静哑光，平铺" },
+    "window": { "file": "assets/tex_window.png", "size": "1280x800",  "prompt": "晨雾远山，松林，柔和金色晨光，无窗框无文字" }
+  },
+  "video": {
+    "file": "assets/sit-loop.mp4",
+    "first_frame": "assets/sit-first.png",
+    "spec": "1280x704 · 124 帧 · 24fps（约 5.2s）· 自带原生音频（H.264 + AAC）",
+    "prompt": "锁死三脚架固定机位，画面完全不动：无变焦、无推近、无平移、无俯仰、无视差。只有画面内部小元素在动——烛光中香烟缓缓盘旋上升、烛火轻颤、尘埃漂浮、窗棂外竹叶因微风微动。首末帧锚定同一张图，保证循环无缝。远处微风环境声，无人物无剪切"
+  }
+}

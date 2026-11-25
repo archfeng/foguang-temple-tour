@@ -1,0 +1,24 @@
+# 心愿数据（运行时生成，含真实访客内容，不入库）
+*.sqlite3
+*.sqlite3-journal
+*.db
+
+# Python 缓存
+__pycache__/
+*.py[cod]
+
+# 本地证书与调试产物
+*.key
+*.crt
+*.pem
+*.log
+*.bak
+*.probe
+_s_*.png
+_blockprobe.js
+
+# 编辑器 / 系统
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

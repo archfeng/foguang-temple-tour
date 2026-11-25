@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<!-- 静态托管只给 Last-Modified、不给 Cache-Control，浏览器会对无版本号的 ES module 做启发式缓存（旧副本能用好几天）。
+     文档本身禁缓存 + 所有子资源统一构建号，保证改过的代码一定能到用户浏览器。 -->
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0">
+<meta name="description" content="沿五台山佛光寺三级台地，从山门步行至唐代东大殿。">
+<title>山寺行 · 佛光寺</title><link rel="icon" href="data:,"><link rel="stylesheet" href="style.css?v=20261120lfx1"><link rel="stylesheet" href="wonder/wonder.css?v=20261119a">
+<style>#tour-progress{font-size:12px;color:#dfbf8b;margin:4px 0}#feed-bird,#feed-fish,#roof-sit{position:fixed;z-index:12;right:12px;top:30%;padding:10px;background:#22342a;color:#f4f0dd;border:1px solid #dfbf8b;border-radius:5px}#roam-progress{display:none;position:fixed;z-index:5;top:96px;left:12px;background:#22342a;color:#dfbf8b;border:1px solid #dfbf8b55;border-radius:4px;padding:3px 8px;font-size:12px}body:not(.clean):is(.roaming,:has(#ritual:not([hidden]))) #roam-progress{display:block}body.clean #roof-sit,body.clean #feed-fish,body.clean #feed-bird{display:none}</style>
+<style>#wish-dialog{width:min(390px,92vw);padding:22px;border:1px solid #dfbf8b80;border-radius:7px;background:#22342a;color:#f4f0dd}#wish-dialog::backdrop{background:#142119aa}#wish-dialog form:not([hidden]){display:grid;gap:10px;margin:12px 0}#wish-dialog label{display:grid;gap:4px}#wish-dialog input,#wish-dialog textarea{background:#182921;color:inherit;border:1px solid #dfbf8b70;border-radius:4px;padding:7px;font:inherit;width:100%}#wish-dialog button,#make-wish{padding:5px 9px}#wish-detail{overflow-wrap:anywhere;white-space:pre-wrap}@media(max-width:700px){#make-wish{position:fixed;top:68px;right:52px}}</style>
+</head>
+<body>
+<main id="scene" aria-label="佛光寺三维场景"></main>
+<canvas id="blessing" aria-hidden="true" hidden></canvas>
+<canvas id="omen" aria-hidden="true" hidden></canvas>
+<div id="omen-toast" hidden aria-live="polite">
+  <div class="omen-row"><span class="omen-seal">兆</span><strong id="omen-name">瑞兆</strong><span id="omen-gain"></span></div>
+  <p id="omen-text">吉兆将至。</p>
+</div>
+<div id="altar-photo" hidden><img src="photos/altar.jpg" alt="佛光寺东大殿佛坛与唐代彩塑现场照片"><div class="photo-smoke" aria-hidden="true"></div><div class="altar-credit">佛堂实景 · 互动为虚拟演示 · <a target="_blank" rel="noopener" href="https://commons.wikimedia.org/wiki/File:佛光寺东大殿佛坛造像左侧面视角.jpg">Patrick20242023</a> · <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a></div></div>
+<header>
+  <div class="mark">佛</div>
+  <div class="brand"><strong>山寺行</strong><small>FOGUANG TEMPLE · WUTAI</small><span class="edition">五台山 / 数字游览</span></div>
+  <div class="tools" role="group" aria-label="视角与声音">
+    <button id="person" type="button" aria-pressed="false" title="切换第一 / 第三人称" data-short="三" data-short-alt="一">第三人称</button>
+    <button id="roam" type="button" aria-pressed="false" title="自由漫步" data-short="走" data-short-alt="停">自由漫步</button>
+    <button id="sound" type="button" aria-pressed="false" title="鸟鸣 / 猫 / 钟，快捷键 M" data-short="音" data-short-alt="静">开启环境音</button>
+  </div>
+  <button type="button" id="make-wish" hidden>许愿</button>
+  <button id="zen" type="button" title="禅房 · 坐下来静观片刻" data-short="禅">禅房</button>
+  <button id="photos" type="button" title="实景图册" data-short="图册">实景图册</button>
+  <button id="clean" type="button" aria-pressed="false" aria-label="隐藏界面" title="隐藏 / 显示界面" data-short="隐">隐藏界面</button>
+</header>
+<aside><div class="kicker">山西 · 五台 <b>01 / 05</b></div><h1>佛光寺</h1><p class="subtitle">从山门，到唐构</p><p id="tour-progress" aria-live="polite"></p><div class="line"></div><h2>全寺鸟瞰</h2><p id="desc">沿西向东，三重台地顺着山势逐级抬升。东大殿坐在最高一层，背靠山坡，面向山谷。</p><button id="walk">▶　沿山径游览</button></aside>
+<div id="hint">拖动旋转 · 滚轮缩放 · 右键平移</div>
+<output id="roam-progress"></output>
+<button id="feed-bird" type="button" hidden>喂山雀</button>
+<button id="feed-fish" type="button" hidden>喂锦鲤</button>
+<button id="roof-sit" type="button" hidden>屋顶坐禅</button>
+<button id="reset" title="恢复鸟瞰视角" aria-label="恢复鸟瞰视角">⌂</button>
+<nav aria-label="游览站点"><button data-stop="0" class="active" title="01 全寺鸟瞰" aria-label="01 全寺鸟瞰">01 <span>全寺鸟瞰</span></button><button data-stop="1" title="02 山门 · 下院" aria-label="02 山门 · 下院">02 <span>山门 · 下院</span></button><button data-stop="2" title="03 券门 · 登高" aria-label="03 券门 · 登高">03 <span>券门 · 登高</span></button><button data-stop="3" title="04 东大殿" aria-label="04 东大殿">04 <span>东大殿</span></button><button data-stop="4" title="05 入殿" aria-label="05 入殿">05 <span>入殿</span></button></nav>
+<section id="ritual" hidden aria-label="游客互动">
+  <div class="ritual-heading"><strong>佛堂 · 游客体验</strong><span class="purse-group"><span id="merit">功德 0</span><span id="purse">香火券 30</span></span></div>
+  <button id="photo-hall-toggle" type="button" aria-pressed="false" title="切换佛堂实景" data-short="实景" data-short-alt="三维">切换佛堂实景</button>
+  <div class="ritual-actions"><button data-action="incense">上香</button><button data-action="bow" id="bow">礼拜</button><button data-action="fortune">抽签</button><button data-action="donate">捐香火</button></div>
+  <p id="ritual-result" aria-live="polite">殿内可缓步移动，走近蒲团即可礼拜。</p>
+  <div class="steps" aria-label="殿内移动"><button data-step="left" aria-label="向左">←</button><button data-step="forward" aria-label="向前">↑</button><button data-step="back" aria-label="向后">↓</button><button data-step="right" aria-label="向右">→</button></div>
+</section>
+<dialog id="donation" aria-labelledby="donation-title"><form method="dialog"><h2 id="donation-title">添一份虚拟香火</h2><p>使用游戏内香火券。不会产生付款。</p><div class="ritual-actions"><button value="1">捐 1 券</button><button value="5">捐 5 券</button><button value="10">捐 10 券</button><button value="cancel">返回</button></div></form></dialog>
+<footer>三维场景按资料重建 · 地形与植栽为景观演绎</footer>
+<dialog id="archive" aria-labelledby="archive-title">
+  <div class="archive-top"><div><small id="archive-kicker">五台山 · 现场摄影</small><h2 id="archive-title">松荫里的佛光寺</h2></div><form method="dialog"><button>返回三维</button></form></div>
+  <div class="archive-modes" aria-label="图册分类"><button data-archive-mode="scenes" aria-pressed="true">今日实景</button><button data-archive-mode="history" aria-pressed="false">建筑史档案</button><button data-archive-mode="film" aria-pressed="false">1937 调查短片</button></div>
+  <section id="archive-film" aria-label="一幅壁画，一座唐殿" hidden>
+    <video id="history-video" controls playsinline preload="none" poster="photos/archive/mural_detail.png">
+      <source src="media/foguang-1937-archives.mp4" type="video/mp4">
+    </video>
+    <div class="photo-tabs film-chapters" aria-label="短片章节">
+      <button type="button" data-film-time="0">敦煌壁画</button>
+      <button type="button" data-film-time="11.375">1937 年考察</button>
+      <button type="button" data-film-time="34.04">梁底题记</button>
+      <button type="button" data-film-time="43.625">殿前经幢</button>
+    </div>
+    <p class="references"><button type="button" id="film-to-history">查看历史照片与图版</button><a href="https://xsg.tsinghua.edu.cn/info/1003/2895.htm" target="_blank" rel="noopener">考察史实 · 清华大学校史馆 ↗</a></p>
+  </section>
+  <figure><img id="photo-image" src="photos/gate.jpg" alt="从院内隔着松枝望向佛光寺山门"><figcaption><div><strong id="photo-title">松荫中的山门</strong><p id="photo-caption">从院内回望山门，松枝掩着灰瓦，远山隐在屋脊之后。</p></div><div class="credit"><a id="photo-source" href="https://commons.wikimedia.org/wiki/File:Wutai_Foguang_Si_2013.08.28_10-58-46.jpg" target="_blank" rel="noopener">摄影：Zhangzhugang</a><span class="credit-sep"> · </span><a id="photo-license" href="https://creativecommons.org/licenses/by-sa/3.0/" target="_blank" rel="noopener">CC BY-SA 3.0</a></div></figcaption></figure>
+  <div class="photo-tabs" aria-label="选择照片"><button data-photo="0" aria-pressed="true">山门</button><button data-photo="1" aria-pressed="false">下院经幢</button><button data-photo="2" aria-pressed="false">东大殿</button></div>
+  <div class="references" id="history-references" hidden>延伸阅读 <a href="https://xsg.tsinghua.edu.cn/info/1003/2895.htm" target="_blank" rel="noopener">清华校史馆 · 1937 年佛光寺调查 ↗</a><a href="https://www.artmuseum.tsinghua.edu.cn/cpsj/zlxx/zlhg/202108/t20210803_16789.shtml" target="_blank" rel="noopener">清华艺博 · 梁思成文献展 ↗</a></div>
+  <div class="references">场地参考 <a href="https://www.archiposition.com/items/854ac53b69" target="_blank" rel="noopener">现场照片与登殿路线 ↗</a><a href="https://dzb.whb.cn/imgPath/2023-10-11/71011.pdf" target="_blank" rel="noopener">券门与窑洞现场记录 ↗</a><a href="https://www.dpm.org.cn/Uploads/pdf/5075/T00028_00.pdf" target="_blank" rel="noopener">东大殿实测研究 ↗</a></div>
+</dialog>
+<dialog id="wish-dialog" aria-labelledby="wish-heading">
+  <h2 id="wish-heading">在上院许愿</h2>
+  <form>
+    <label>名字<input name="guest" maxlength="16" required></label>
+    <label>心愿<textarea name="wish" maxlength="120" rows="4" required></textarea></label>
+    <small id="wish-note" aria-live="polite"></small>
+    <button type="submit">系到上院石栏横杆</button>
+  </form>
+  <div id="wish-detail" hidden><strong></strong><p></p></div>
+  <button type="button" id="close-wish">返回</button>
+</dialog>
+<dialog id="zen-intro" aria-labelledby="zen-intro-title">
+  <div class="zen-kicker">山寺行 · 静处</div>
+  <h2 id="zen-intro-title">禅房 · 坐下来静观片刻</h2>
+  <p class="zen-lead">从大殿一侧的小门进去，是一间安静的禅房。这里没有讲解，也没有任务——只有光影、木鱼和一张蒲团。想歇一会儿，就进去坐坐。</p>
+  <ul class="zen-list">
+    <li>拖动环视四周，或按 <b>← →</b> 换朝向</li>
+    <li>走到中间蒲团，<b>点击</b>或按 <b>E</b> 坐下，<b>Esc</b> 起身</li>
+    <li>右下角可开启或关闭木鱼声</li>
+    <li>可转向查看四面照片，右上角可截图</li>
+    <li>「回佛光寺」接着你刚才站的地方继续，不会重新载入</li>
+  </ul>
+  <div class="zen-actions"><button type="button" id="zen-enter">进去静坐</button><button type="button" id="zen-cancel">再逛逛</button></div>
+</dialog>
+<div id="roam-hint" hidden>WASD / 方向键行走 · 点一下画面＝鼠标视角，移动鼠标即可环顾，Esc 交还鼠标 · Shift 快走</div>
+<div id="pray-prompt" hidden>站到任一只蒲团前 · 按 E 或点蒲团开始礼拜</div>
+<div id="prayer" hidden aria-live="polite"><b id="prayer-n">0</b><span>拜</span><em>按 E 起身</em></div>
+<section id="buffs" hidden aria-label="所得福分">
+  <div class="buffs-head"><strong>八德</strong><span id="buff-total">福缘 0</span></div>
+  <ul id="buff-list"></ul>
+</section>
+<section id="visitors" hidden aria-label="同游者"><div class="visitors-head"><strong>同游</strong><span id="visitor-count">1 人</span></div><ul id="visitor-list"></ul><form id="visitor-name"><input id="visitor-input" maxlength="8" placeholder="换个名字" aria-label="你的名字"><button type="submit">取</button></form></section>
+<div id="roam-pad" hidden aria-label="自由漫步移动">
+  <button data-roam="forward" aria-label="向前">↑</button>
+  <button data-roam="left" aria-label="向左">←</button>
+  <button data-roam="back" aria-label="向后">↓</button>
+  <button data-roam="right" aria-label="向右">→</button>
+  <button id="roam-jump" type="button" aria-label="轻功跳跃" hidden>跳</button>
+</div>
+<div id="draw" hidden aria-label="抽签">
+  <div class="draw-box" role="dialog" aria-modal="true" aria-labelledby="draw-caption">
+    <div class="tube-stage">
+      <div class="tube"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+      <div class="slip"><span class="slip-no" id="slip-no">第三签</span><span class="slip-name" id="slip-name">檐雨</span></div>
+    </div>
+    <p class="draw-caption" id="draw-caption">摇签筒</p>
+    <div class="draw-verse" hidden>
+      <h3 id="draw-title">第三签 · 檐雨</h3>
+      <p id="draw-text">瓦上旧雨，阶前新绿。</p>
+    </div>
+    <button id="draw-close" type="button" hidden>收签</button>
+  </div>
+</div>
+<section id="live" hidden aria-label="直播间互动">
+  <div id="live-cast"><ul id="cast-list"></ul></div>
+  <div id="wish-wall">
+    <div class="wish-head">祈愿 · 长明灯</div>
+    <ul id="wish-list"></ul>
+  </div>
+  <div id="live-cues"><span>评论区发</span><b>敲钟</b><b>上香</b><b>求签</b><b>许愿 名字</b><b>赐福</b><b>进殿</b></div>
+  <div id="live-count"><b id="live-n">0</b> 次互动</div>
+</section>
+<div id="status" role="status"><b id="status-main">正在载入山寺…</b><small id="status-sub"></small><button id="status-retry" type="button" hidden>重新载入</button></div>
+<script>
+/* 载入看门狗：脚本被拦、内核太旧、网络断了，都在这里给出人话提示，别让人对着「正在载入」干等 */
+(function(){
+  var box=document.querySelector('#status'),main=document.querySelector('#status-main'),
+      sub=document.querySelector('#status-sub'),retry=document.querySelector('#status-retry');
+  if(!box)return;
+  window.__say=function(t,s){ if(!box.hidden){ main.textContent=t; if(s!==undefined) sub.textContent=s; } };
+  window.__sceneReady=false;
+  // 浏览器认不认 ES module（老内核/兼容模式会 false），不用等脚本下完就能判断
+  window.__esm=('noModule' in HTMLScriptElement.prototype);
+  window.__fail=function(t,s){
+    window.__sceneReady=false;
+    main.textContent=t; sub.textContent=s||'';
+    retry.hidden=false;
+  };
+  retry.onclick=function(){ retry.hidden=true; main.textContent='正在重新载入…'; sub.textContent=''; location.reload(); };
+  addEventListener('error',function(e){
+    var t=e.target;
+    if(t&&(t.tagName==='SCRIPT'||t.tagName==='LINK')){
+      window.__fail('资源没载入完整','请检查网络后点下面重新载入。');
+    }
+  },true);
+  // 7 秒还没就绪：区分「浏览器跑不了模块」和「只是网慢」
+  setTimeout(function(){
+    if(window.__sceneReady)return;
+    if(!window.__esm){
+      window.__fail('这个浏览器没能启动三维场景','点重新载入；仍不行，请用手机自带浏览器或 Chrome 打开。');
+    }else{
+      window.__say('正在下载三维引擎…','网络较慢，首次打开要传 1MB 左右，请稍等。');
+    }
+  },7000);
+  // 25 秒还没好：说明白在等什么
+  setTimeout(function(){
+    if(!window.__sceneReady&&window.__esm){
+      window.__say('还在搭建山寺…','场景数据仍在传输，请再等一会儿；下次打开会快很多。');
+    }
+  },25000);
+  // 禅房：先给一句说明，再让人决定要不要进去（不再一点就跳页）
+  (function(){
+    var dlg=document.getElementById('zen-intro');
+    var zen=document.getElementById('zen');
+    if(!dlg||!zen)return;
+    zen.addEventListener('click',function(){ if(dlg.showModal)dlg.showModal(); else location.href='zen/'; });
+    document.getElementById('zen-enter').addEventListener('click',function(){ location.href='zen/'; });
+    document.getElementById('zen-cancel').addEventListener('click',function(){ dlg.close(); });
+    dlg.addEventListener('click',function(e){ if(e.target===dlg)dlg.close(); });
+  })();
+})();
+</script>
+<script defer src="cloud-sdk.js?v=20261112j"></script><script defer src="three.min.js?v=20261112j"></script><script type="module" src="tour.js?v=20261125wishes"></script><script type="module" src="archive.js?v=20261125wishes"></script><script type="module" src="ui-compact.js?v=20261112j"></script><script type="module" src="mobile-ux.js?v=20261117d"></script><script type="module" src="ambience.js?v=20261118p"></script>
+<!-- 独立增强模块：材质、昼夜四季、植被、生灵与互动。失败时自行隔离，不影响主游览。 -->
+<script type="module" src="wonder/core.js?v=20261125sky2"></script>
+<!-- 统一滤镜链：先加载接管 renderer.render，下面四个滤镜只注册状态 -->
+<script type="module" src="fxchain.js?v=20261125wishes"></script>
+<script type="module" src="voxel.js?v=20261125wishes"></script>
+<script type="module" src="gongbi.js?v=20261125wishes"></script>
+<script type="module" src="youhua.js?v=20261125wishes"></script>
+<script type="module" src="lightfx.js?v=20261125wishes"></script>
+<script type="module" src="nightsky.js?v=20261125wishes"></script>
+<script type="module" src="oilpaint3d.js?v=20261125wishes"></script>
+<script type="module" src="pond-mirror.js?v=20261125wishes"></script>
+<script defer src="vendor/GLTFLoader.global.js?v=20261119glb2"></script>
+<script type="module" src="glb-trees.js?v=20261119glb2"></script>
+</body></html>
